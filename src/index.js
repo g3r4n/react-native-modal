@@ -1,11 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { Dimensions, Modal } from 'react-native';
-import { View,initializeRegistryWithDefinitions } from 'react-native-animatable';
+import { View, initializeRegistryWithDefinitions } from 'react-native-animatable';
 import * as ANIMATION_DEFINITIONS from './animations';
 
 import styles from './index.style.js';
 
-// override default animations
+// Override default animations
 initializeRegistryWithDefinitions(ANIMATION_DEFINITIONS);
 
 export class ReactNativeModal extends Component {
@@ -43,6 +43,11 @@ export class ReactNativeModal extends Component {
     onBackButtonPress: () => null,
   };
 
+  // We use an internal state for keeping track of the modal visibility: this allows us to keep
+  // the modal visibile during the exit animation, even if the user has already change the
+  // isVisible prop to false.
+  // We also store in the state the device width and height so that we can update the modal on
+  // device rotation.
   state = {
     isVisible: false,
     deviceWidth: Dimensions.get('window').width,
@@ -68,10 +73,10 @@ export class ReactNativeModal extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    // On modal open request slide the view up and fade in the backdrop
+    // On modal open request, we slide the view up and fade in the backdrop
     if (this.state.isVisible && !prevState.isVisible) {
       this._open();
-      // On modal close request slide the view down and fade out the backdrop
+      // On modal close request, we slide the view down and fade out the backdrop
     } else if (!this.props.isVisible && prevProps.isVisible) {
       this._close();
     }
@@ -104,6 +109,7 @@ export class ReactNativeModal extends Component {
   };
 
   _handleLayout = event => {
+    // Here we update the device dimensions in the state if the layout changed (triggering a render)
     const deviceWidth = Dimensions.get('window').width;
     const deviceHeight = Dimensions.get('window').height;
     if (deviceWidth !== this.state.deviceWidth || deviceHeight !== this.state.deviceHeight) {
